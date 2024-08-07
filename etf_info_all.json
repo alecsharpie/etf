@@ -1,0 +1,195 @@
+{
+    "etfs": [{
+            "ticker": "VAS",
+            "name": "Vanguard Australian Shares Index ETF",
+            "description": "Tracks S&P/ASX 300 index, covering Australia's 300 largest companies",
+            "etfType": "Australian Equity Index"
+        },
+        {
+            "ticker": "QOZ",
+            "name": "BetaShares FTSE RAFI Australia 200 ETF",
+            "description": "Tracks FTSE RAFI Australia 200 index, covering Australia's 200 largest companies",
+            "etfType": "Australian Equity Index"
+        },
+        {
+            "ticker": "STW",
+            "name": "SPDR® S&P®/ASX 200 Fund",
+            "description": "Tracks S&P/ASX 200 Index, covering Australia's 200 largest and most liquid companies",
+            "etfType": "Australian Equity Index"
+        },
+        {
+            "ticker": "IOZ",
+            "name": "iShares Core S&P/ASX 200 ETF",
+            "description": "Tracks S&P/ASX 200 Index, covering Australia's 200 largest companies",
+            "etfType": "Australian Equity Index"
+        },
+        {
+            "ticker": "MVW",
+            "name": "VanEck Vectors Australian Equal Weight ETF",
+            "description": "Tracks MVIS Australian Equal Weight Index, covering largest and most liquid Australian companies equally weighted",
+            "etfType": "Australian Equity Index"
+        },
+        {
+            "ticker": "VHY",
+            "name": "Vanguard Australian Shares High Yield ETF",
+            "description": "Tracks FTSE ASFA Australia High Dividend Yield Index, focusing on high forecast dividends",
+            "etfType": "Australian Equity Strategy"
+        },
+        {
+            "ticker": "HVST",
+            "name": "BetaShares Australian Dividend Harvester Fund",
+            "description": "Focuses on large cap Australian shares with regular franked dividend income",
+            "etfType": "Australian Equity Strategy"
+        },
+        {
+            "ticker": "SYI",
+            "name": "SPDR® MSCI Australia Select High Dividend Yield Fund",
+            "description": "Tracks MSCI Australia Select High Dividend Yield Index, focusing on higher than average dividend yields",
+            "etfType": "Australian Equity Strategy"
+        },
+        {
+            "ticker": "IHD",
+            "name": "iShares S&P/ASX Dividend Opportunities ETF",
+            "description": "Tracks S&P/ASX Australia Dividend Opportunities Index, covering 50 high yielding Australian companies",
+            "etfType": "Australian Equity Strategy"
+        },
+        {
+            "ticker": "ZYAU",
+            "name": "Global X S&P/ASX 200 High Dividend ETF",
+            "description": "Tracks S&P/ASX 200 Shareholder Yield Index, covering 50 highest yielding Australian companies with quality filters",
+            "etfType": "Australian Equity Strategy"
+        },
+        {
+            "ticker": "VTS",
+            "name": "Vanguard US Total Market Shares Index",
+            "description": "Tracks CRSP US Total Market Index, covering 99.5% of the US stock market",
+            "etfType": "US Equity Index"
+        },
+        {
+            "ticker": "NDQ",
+            "name": "BetaShares NASDAQ 100 ETF",
+            "description": "Tracks NASDAQ-100 Index, covering 100 largest non-financial securities on NASDAQ",
+            "etfType": "US Equity Index"
+        },
+        {
+            "ticker": "SPY",
+            "name": "SPDR® S&P 500® ETF Trust",
+            "description": "Tracks S&P 500® Index, covering the top 500 companies in the US",
+            "etfType": "US Equity Index"
+        },
+        {
+            "ticker": "IVV",
+            "name": "iShares S&P 500 ETF",
+            "description": "Tracks S&P 500 Index, covering the top 500 companies in the US",
+            "etfType": "US Equity Index"
+        },
+        {
+            "ticker": "MOAT",
+            "name": "VanEck Vectors Morningstar Wide Moat ETF",
+            "description": "Tracks Morningstar Wide Moat Focus Index, focusing on undervalued US companies with wide economic moats",
+            "etfType": "US Equity Index"
+        },
+        {
+            "ticker": "ZYUS",
+            "name": "Global X S&P 500 High Yield Low Volatility ETF",
+            "description": "Tracks S&P 500 Low Volatility High Dividend Index, focusing on 50 highest yielding and least volatile S&P 500 stocks",
+            "etfType": "US Equity Index"
+        },
+        {
+            "ticker": "VGS",
+            "name": "Vanguard MSCI Index International Shares ETF",
+            "description": "Tracks MSCI World ex-Australia Index, covering global developed markets",
+            "etfType": "Global Equity Index"
+        },
+        {
+            "ticker": "WRLD",
+            "name": "BetaShares Managed Risk Global Share Fund",
+            "description": "Diversified portfolio of global shares with reduced volatility and loss protection",
+            "etfType": "Global Equity Index"
+        },
+        {
+            "ticker": "WDIV",
+            "name": "SPDR® S&P® Global Dividend Fund",
+            "description": "Tracks S&P Global Dividend Aristocrats Index, focusing on high dividend-yield companies with consistent dividends",
+            "etfType": "Global Equity Index"
+        },
+        {
+            "ticker": "IWLD",
+            "name": "iShares Core MSCI World ex Australia ESG Leaders ETF",
+            "description": "Tracks MSCI World Ex Australia Custom ESG Leaders Index, focusing on companies with better sustainability credentials",
+            "etfType": "Global Equity Index"
+        },
+        {
+            "ticker": "QUAL",
+            "name": "VanEck Vectors MSCI World ex Australia Quality ETF",
+            "description": "Tracks MSCI World ex Australia Quality Index, covering 300 quality international companies",
+            "etfType": "Global Equity Index"
+        },
+        {
+            "ticker": "VGE",
+            "name": "Vanguard FTSE Emerging Markets Shares ETF",
+            "description": "Tracks FTSE Emerging Markets All Cap China A Inclusion Index, covering emerging markets companies",
+            "etfType": "Global Equity Sectors"
+        },
+        {
+            "ticker": "FUEL",
+            "name": "BetaShares Global Energy Companies ETF - Currency Hedged",
+            "description": "Covers largest global energy companies by market cap, excluding Australian listings",
+            "etfType": "Global Equity Sectors"
+        },
+        {
+            "ticker": "DJRE",
+            "name": "SPDR® Dow Jones® Global Real Estate Fund",
+            "description": "Tracks Dow Jones Global Select Real Estate Securities Index, covering global REITs and real estate companies",
+            "etfType": "Global Equity Sectors"
+        },
+        {
+            "ticker": "IXJ",
+            "name": "iShares Global Healthcare ETF",
+            "description": "Tracks S&P Global 1200 Healthcare Sector Index, covering global healthcare companies",
+            "etfType": "Global Equity Sectors"
+        },
+        {
+            "ticker": "IFRA",
+            "name": "VanEck Vectors FTSE Global Infrastructure (Hedged) ETF",
+            "description": "Tracks FTSE Developed Core Infrastructure 50/50 $A Hedged Index, covering global infrastructure securities",
+            "etfType": "Global Equity Sectors"
+        },
+        {
+            "ticker": "ROBO",
+            "name": "Global X ROBO Global Robotics and Automation ETF",
+            "description": "Tracks ROBO Global Robotics and Automation Index, focusing on robotics, automation, and AI companies",
+            "etfType": "Global Equity Sectors"
+        },
+        {
+            "ticker": "VAF",
+            "name": "Vanguard Australian Fixed Interest Index",
+            "description": "Tracks Bloomberg AusBond Composite 0+ Yr Index, covering investment-grade Australian bonds",
+            "etfType": "Fixed Income"
+        },
+        {
+            "ticker": "AAA",
+            "name": "BetaShares Australian High Interest Cash ETF",
+            "description": "Invests in high interest bank deposit accounts with major Australian banks",
+            "etfType": "Fixed Income"
+        },
+        {
+            "ticker": "BOND",
+            "name": "SPDR® S&P®/ASX Australian Bond Fund",
+            "description": "Tracks S&P/ASX Australian Fixed Interest Index, covering the Australian fixed rate bond market",
+            "etfType": "Fixed Income"
+        },
+        {
+            "ticker": "IAF",
+            "name": "iShares Core Composite Bond ETF",
+            "description": "Tracks Bloomberg AusBond Composite 0+ Yr Index, covering investment-grade Australian bonds",
+            "etfType": "Fixed Income"
+        },
+        {
+            "ticker": "PLUS",
+            "name": "VanEck Vectors Australian Corporate Bond Plus ETF",
+            "description": "Tracks iBoxx AUD Corporates Yield Plus Mid Price Index, covering investment grade corporate bonds with enhanced yield",
+            "etfType": "Fixed Income"
+        }
+    ]
+}

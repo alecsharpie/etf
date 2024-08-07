@@ -1,4 +1,4 @@
-from fasthtml import FastHTML, Title, Main, Div, H1, P, Button, Img, Select, Option, Table, Tr, Th, Td
+from fasthtml import FastHTML, Title, Main, Div, H1
 from fasthtml.common import *
 import yfinance as yf
 import pandas as pd
@@ -7,60 +7,41 @@ from sklearn.linear_model import LinearRegression
 from datetime import date, timedelta
 import io
 import base64
+import json
 
 app = FastHTML()
 
-# ETF information dictionary
-ETF_INFO = {
-    'VAS.AX': {
-        'name': 'Vanguard Australian Shares Index ETF',
-        'description': "Provides exposure to Australia's 300 largest companies, aiming to track the performance of the S&P/ASX 300 index performance."
-    },
-    'VHY.AX': {
-        'name': 'Vanguard Australian Shares High Yield ETF',
-        'description': "Provides exposure to companies listed on the ASX that have high forecast dividends, aiming to track the performance of the FTSE ASFA Australia High Dividend Yield Index."
-    },
-    'VTS.AX': {
-        'name': 'Vanguard US Total Market Shares Index',
-        'description': "Provides exposure to 99.5% of the US stock market, aiming to track the performance of the CRSP US Total Market Index."
-    },
-    'VGS.AX': {
-        'name': 'Vanguard MSCI Index International Shares ETF',
-        'description': "Provides exposure to global developed markets, the largest country exposures are the US, Japan, UK, France and Canada, aiming to track the performance of the MSCI World ex-Australia Index (with net dividends reinvested)."
-    },
-    'VGE.AX': {
-        'name': 'Vanguard FTSE Emerging Markets Shares ETF',
-        'description': "Provides exposure to companies listed in emerging markets, aiming to track the performance of the FTSE Emerging Markets All Cap China A Inclusion Index, hedged into Australian dollars."
-    },
-    'VAF.AX': {
-        'name': 'Vanguard Australian Fixed Interest Index',
-        'description': "Provides exposure to investment-grade bonds issued in the Australian bond market, aiming to track the performance of the Bloomberg AusBond Composite 0+ Yr Index."
-    }
-}
+# Load ETF info from JSON
+with open('etf_info.json', 'r') as f:
+    etf_data = json.load(f)
+    ETF_INFO = {etf['ticker']: etf for etf in etf_data['etfs']}
 
 TICKERS = list(ETF_INFO.keys())
 
-# ... (keep the existing helper functions)
+def get_past_date(days_ago):
+    today = date.today()
+    return (today - timedelta(days=days_ago)).isoformat()
+
+def fit_model(data, start_date):
+    filtered_data = data[data['Date'] >= pd.to_datetime(start_date)]
+    X = filtered_data[['DateNumeric']]
+    y = filtered_data['Close']
+    model = LinearRegression()
+    model.fit(X, y)
+    return model, filtered_data
 
 @app.get("/")
 def home():
-    return Title("ETF Analysis"), Main(
-        H1("ETF Analysis"),
-        P("Select ETFs to analyze and click the button to generate the analysis."),
-        Select(*[Option(f"{ticker} - {ETF_INFO[ticker]['name']}", value=ticker) for ticker in TICKERS], name="tickers", multiple=True),
-        Button("Generate Analysis", hx_post="/generate", hx_target="#results", hx_include="[name='tickers']"),
-        Div(id="results")
-    )
-
-@app.post("/generate")
-def generate(tickers: list):
     ticker_data = []
-    for ticker in tickers:
-        etf_data = yf.download(ticker, start='2003-01-01')
+    for ticker in TICKERS:
+        etf_data = yf.download(f"{ticker}.AX", start='1973-01-01')  # Fetch 50 years of data
+        if etf_data.empty:
+            continue  # Skip this ticker if no data is available
         etf_data['Date'] = etf_data.index
         etf_data['DateNumeric'] = etf_data['Date'].apply(lambda date: date.toordinal())
 
         models = {
+            '50Y': fit_model(etf_data, get_past_date(50 * 365)),
             '20Y': fit_model(etf_data, get_past_date(20 * 365)),
             '3Y': fit_model(etf_data, get_past_date(3 * 365)),
             '1Y': fit_model(etf_data, get_past_date(365)),
@@ -69,56 +50,60 @@ def generate(tickers: list):
         latest_date = etf_data['DateNumeric'].iloc[-1]
         latest_price = etf_data['Close'].iloc[-1]
 
-        model_20y, _ = models['20Y']
-        predicted_price_20y = model_20y.predict([[latest_date]])[0]
-        delta_20y = predicted_price_20y - latest_price
+        model_50y, _ = models['50Y']
+        predicted_price_50y = model_50y.predict([[latest_date]])[0]
+        delta_50y = predicted_price_50y - latest_price
 
-        ticker_data.append((ticker, etf_data, models, abs(delta_20y)))
+        ticker_data.append((ticker, etf_data, models, delta_50y))
 
-    # Sort tickers based on absolute 20Y delta
+    # Sort tickers based on 50Y delta (not absolute value)
     ticker_data.sort(key=lambda x: x[3], reverse=True)
 
-    results = []
+    results = [Title("ETF Analysis"), H1("ETF Analysis")]
     for ticker, etf_data, models, _ in ticker_data:
-        fig, axs = plt.subplots(1, 3, figsize=(18, 6))
-        fig.suptitle(f'{ticker} - {ETF_INFO[ticker]["name"]} Analysis', fontsize=16)
+        fig, axs = plt.subplots(2, 2, figsize=(12, 8))  # Smaller figure size
+        fig.suptitle(f'{ticker} - {ETF_INFO[ticker]["name"]} Analysis', fontsize=14)
 
         latest_date = etf_data['DateNumeric'].iloc[-1]
         latest_price = etf_data['Close'].iloc[-1]
 
         ticker_results = [
             H2(f"{ticker} - {ETF_INFO[ticker]['name']}"),
+            H3(f"Type: {ETF_INFO[ticker]['etfType']}", style="color: #007bff;"),
             P(ETF_INFO[ticker]['description']),
-            Table(
-                Tr(Th("Timespan"), Th("Predicted Price"), Th("Actual Price"), Th("Recommendation"), Th("Delta"))
-            )
         ]
 
         for i, (timespan, (model, data)) in enumerate(models.items()):
             input_data = pd.DataFrame([[latest_date]], columns=['DateNumeric'])
             predicted_price = model.predict(input_data)[0]
 
-            axs[i].plot(data['Date'], data['Close'], label='Actual Price', color='black', linewidth=2)
-            axs[i].plot(data['Date'], model.predict(data[['DateNumeric']]), label=f'{timespan} Prediction', linewidth=2)
-            axs[i].set_title(timespan, fontsize=15)
-            axs[i].set_ylabel('Price (AUD)', fontsize=10)
-            axs[i].legend(fontsize=8, loc='upper left')
+            row = i // 2
+            col = i % 2
+            axs[row, col].plot(data['Date'], data['Close'], label='Actual Price', color='black', linewidth=1)
+            axs[row, col].plot(data['Date'], model.predict(data[['DateNumeric']]), label=f'{timespan} Prediction', linewidth=1)
+            axs[row, col].set_title(timespan, fontsize=12)
+            axs[row, col].set_ylabel('Price (AUD)', fontsize=8)
+            axs[row, col].legend(fontsize=6, loc='upper left')
+            axs[row, col].tick_params(axis='both', which='major', labelsize=6)
 
             delta = predicted_price - latest_price
             buy_sell = "Buy" if delta > 0 else "Sell"
+            delta_percent = (delta / latest_price) * 100
+
+            color = "green" if delta > 0 else "red"
             ticker_results.append(
-                Tr(
-                    Td(timespan),
-                    Td(f"${predicted_price:.2f}"),
-                    Td(f"${latest_price:.2f}"),
-                    Td(buy_sell),
-                    Td(f"${delta:.2f}")
+                Div(
+                    Strong(f"{timespan} Prediction:"),
+                    f" ${predicted_price:.2f}",
+                    P(f"Current Price: ${latest_price:.2f}"),
+                    P(F"Delta: ", Strong(f"${delta:.2f} ({delta_percent:.2f}%)", style=f"color: {color}")),
+                    P(f"Recommendation: {buy_sell}")
                 )
             )
 
-        buffer = io.BytesIO()
         plt.tight_layout()
-        plt.savefig(buffer, format='png')
+        buffer = io.BytesIO()
+        plt.savefig(buffer, format='png', dpi=300)
         buffer.seek(0)
         image_base64 = base64.b64encode(buffer.getvalue()).decode()
 
@@ -126,7 +111,7 @@ def generate(tickers: list):
         results.extend(ticker_results)
         plt.close(fig)
 
-    return Div(*results)
+    return Main(*results)
 
 if __name__ == "__main__":
     import uvicorn

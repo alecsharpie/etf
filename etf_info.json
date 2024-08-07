@@ -1,0 +1,15 @@
+{
+    "etfs": [{
+            "ticker": "VAS",
+            "name": "Vanguard Australian Shares Index ETF",
+            "description": "Tracks S&P/ASX 300 index, covering Australia's 300 largest companies",
+            "etfType": "Australian Equity Index"
+        },
+        {
+            "ticker": "QOZ",
+            "name": "BetaShares FTSE RAFI Australia 200 ETF",
+            "description": "Tracks FTSE RAFI Australia 200 index, covering Australia's 200 largest companies",
+            "etfType": "Australian Equity Index"
+        }
+    ]
+}
