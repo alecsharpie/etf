@@ -1,4 +1,4 @@
-from fasthtml import FastHTML, Title, Main, Div, H1
+from fasthtml import FastHTML, Title, Main, H1, Img
 from fasthtml.common import *
 import yfinance as yf
 import pandas as pd
@@ -61,54 +61,41 @@ def home():
 
     results = [Title("ETF Analysis"), H1("ETF Analysis")]
     for ticker, etf_data, models, _ in ticker_data:
-        fig, axs = plt.subplots(2, 2, figsize=(12, 8))  # Smaller figure size
-        fig.suptitle(f'{ticker} - {ETF_INFO[ticker]["name"]} Analysis', fontsize=14)
+        fig, axs = plt.subplots(1, 4, figsize=(20, 5))
+        fig.suptitle(f'{ticker} - {ETF_INFO[ticker]["name"]} ({ETF_INFO[ticker]["etfType"]})\n{ETF_INFO[ticker]["description"]}', fontsize=14, wrap=True)
 
         latest_date = etf_data['DateNumeric'].iloc[-1]
         latest_price = etf_data['Close'].iloc[-1]
-
-        ticker_results = [
-            H2(f"{ticker} - {ETF_INFO[ticker]['name']}"),
-            H3(f"Type: {ETF_INFO[ticker]['etfType']}", style="color: #007bff;"),
-            P(ETF_INFO[ticker]['description']),
-        ]
 
         for i, (timespan, (model, data)) in enumerate(models.items()):
             input_data = pd.DataFrame([[latest_date]], columns=['DateNumeric'])
             predicted_price = model.predict(input_data)[0]
 
-            row = i // 2
-            col = i % 2
-            axs[row, col].plot(data['Date'], data['Close'], label='Actual Price', color='black', linewidth=1)
-            axs[row, col].plot(data['Date'], model.predict(data[['DateNumeric']]), label=f'{timespan} Prediction', linewidth=1)
-            axs[row, col].set_title(timespan, fontsize=12)
-            axs[row, col].set_ylabel('Price (AUD)', fontsize=8)
-            axs[row, col].legend(fontsize=6, loc='upper left')
-            axs[row, col].tick_params(axis='both', which='major', labelsize=6)
+            axs[i].plot(data['Date'], data['Close'], label='Actual Price', color='black', linewidth=1)
+            axs[i].plot(data['Date'], model.predict(data[['DateNumeric']]), label=f'{timespan} Prediction', linewidth=1)
+            axs[i].set_title(timespan, fontsize=12)
+            axs[i].set_ylabel('Price (AUD)', fontsize=8)
+            axs[i].legend(fontsize=6, loc='upper left')
+            axs[i].tick_params(axis='both', which='major', labelsize=6)
 
             delta = predicted_price - latest_price
             buy_sell = "Buy" if delta > 0 else "Sell"
             delta_percent = (delta / latest_price) * 100
 
             color = "green" if delta > 0 else "red"
-            ticker_results.append(
-                Div(
-                    Strong(f"{timespan} Prediction:"),
-                    f" ${predicted_price:.2f}",
-                    P(f"Current Price: ${latest_price:.2f}"),
-                    P(F"Delta: ", Strong(f"${delta:.2f} ({delta_percent:.2f}%)", style=f"color: {color}")),
-                    P(f"Recommendation: {buy_sell}")
-                )
-            )
+            axs[i].annotate(f'Prediction: ${predicted_price:.2f}\nDelta: ${delta:.2f} ({delta_percent:.2f}%)\n{buy_sell}',
+                            xy=(0.05, 0.95), xycoords='axes fraction',
+                            fontsize=8, ha='left', va='top',
+                            bbox=dict(boxstyle='round,pad=0.5', fc='yellow', alpha=0.5),
+                            color=color)
 
         plt.tight_layout()
         buffer = io.BytesIO()
-        plt.savefig(buffer, format='png', dpi=300)
+        plt.savefig(buffer, format='png', dpi=150)
         buffer.seek(0)
         image_base64 = base64.b64encode(buffer.getvalue()).decode()
 
-        ticker_results.append(Img(src=f"data:image/png;base64,{image_base64}", alt=f"{ticker} Analysis"))
-        results.extend(ticker_results)
+        results.append(Img(src=f"data:image/png;base64,{image_base64}", alt=f"{ticker} Analysis", style="width: 100%; margin-top: 10px;"))
         plt.close(fig)
 
     return Main(*results)
