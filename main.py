@@ -56,10 +56,10 @@ def home():
 
         slope_50y = model_50y.coef_[0]
         yearly_change = round(slope_50y * 365, 2)
-        pct_yearly_change = round((slope_50y / latest_price) * 100, 2)
+        pct_yearly_change = round((yearly_change / latest_price) * 100, 2)
         length_of_time = round((etf_data['Date'].iloc[-1] - etf_data['Date'].iloc[0]).days / 365, 2)
 
-        ticker_data.append((ticker, etf_data, models, delta_50y, yearly_change, length_of_time))
+        ticker_data.append((ticker, etf_data, models, delta_50y, pct_yearly_change, length_of_time))
 
     # Sort tickers based on 50Y delta (not absolute value)
     ticker_data.sort(key=lambda x: x[4], reverse=True)
