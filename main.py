@@ -12,7 +12,7 @@ import json
 app = FastHTML()
 
 # Load ETF info from JSON
-with open('etf_info.json', 'r') as f:
+with open('etf_info_all.json', 'r') as f:
     etf_data = json.load(f)
     ETF_INFO = {etf['ticker']: etf for etf in etf_data['etfs']}
 
@@ -54,15 +54,20 @@ def home():
         predicted_price_50y = model_50y.predict([[latest_date]])[0]
         delta_50y = predicted_price_50y - latest_price
 
-        ticker_data.append((ticker, etf_data, models, delta_50y))
+        slope_50y = model_50y.coef_[0]
+        yearly_change = round(slope_50y * 365, 2)
+        pct_yearly_change = round((slope_50y / latest_price) * 100, 2)
+        length_of_time = round((etf_data['Date'].iloc[-1] - etf_data['Date'].iloc[0]).days / 365, 2)
+
+        ticker_data.append((ticker, etf_data, models, delta_50y, yearly_change, length_of_time))
 
     # Sort tickers based on 50Y delta (not absolute value)
-    ticker_data.sort(key=lambda x: x[3], reverse=True)
+    ticker_data.sort(key=lambda x: x[4], reverse=True)
 
     results = [Title("ETF Analysis"), H1("ETF Analysis")]
-    for ticker, etf_data, models, _ in ticker_data:
+    for ticker, etf_data, models, _, yearly_change, length_of_time in ticker_data:
         fig, axs = plt.subplots(1, 4, figsize=(20, 5))
-        fig.suptitle(f'{ticker} - {ETF_INFO[ticker]["name"]} ({ETF_INFO[ticker]["etfType"]})\n{ETF_INFO[ticker]["description"]}', fontsize=14, wrap=True)
+        fig.suptitle(f'{ticker} - {ETF_INFO[ticker]["name"]} ({ETF_INFO[ticker]["etfType"]})\n{ETF_INFO[ticker]["description"]}\nyearly change: {yearly_change}%\nyears of data: {length_of_time}', fontsize=14, wrap=True)
 
         latest_date = etf_data['DateNumeric'].iloc[-1]
         latest_price = etf_data['Close'].iloc[-1]
@@ -70,6 +75,10 @@ def home():
         for i, (timespan, (model, data)) in enumerate(models.items()):
             input_data = pd.DataFrame([[latest_date]], columns=['DateNumeric'])
             predicted_price = model.predict(input_data)[0]
+
+            slope_50y = model_50y.coef_[0]
+            yearly_change = round(slope_50y * 365, 2)
+            length_of_time = round((etf_data['Date'].iloc[-1] - etf_data['Date'].iloc[0]).days / 365, 2)
 
             axs[i].plot(data['Date'], data['Close'], label='Actual Price', color='black', linewidth=1)
             axs[i].plot(data['Date'], model.predict(data[['DateNumeric']]), label=f'{timespan} Prediction', linewidth=1)
