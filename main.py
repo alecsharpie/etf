@@ -1,7 +1,9 @@
-from fasthtml import FastHTML, Title, Main, Img, P, Div, Style
+from fasthtml import FastHTML
 from fasthtml.common import *
 import yfinance as yf
 import pandas as pd
+import matplotlib
+matplotlib.use('Agg')  # Set the backend to Agg before importing pyplot
 import matplotlib.pyplot as plt
 from sklearn.linear_model import LinearRegression
 from datetime import date, timedelta
@@ -40,7 +42,7 @@ def create_plot(etf_data, models):
         predicted_price = model.predict(pd.DataFrame({'DateNumeric': [latest_date]}))[0]
         delta_percent = ((latest_price - predicted_price) / predicted_price) * 100
         direction = "above" if delta_percent > 0 else "below"
-        color = "green" if delta_percent > 0 else "red"
+        color = "green" if delta_percent < 0 else "red"
 
         axs[i].plot(data['Date'], data['Close'], label='Actual Price', color='black', linewidth=1)
         axs[i].plot(data['Date'], model.predict(data[['DateNumeric']]), label=f'{timespan} Prediction', linewidth=1)
@@ -49,8 +51,8 @@ def create_plot(etf_data, models):
         axs[i].tick_params(axis='both', which='major', labelsize=8)
         axs[i].annotate(f'Price is {abs(delta_percent):.2f}% {direction} prediction',
                         xy=(0.05, 0.95), xycoords='axes fraction',
-                        fontsize=14, ha='left', va='top', color=color, weight='bold')
-        axs[i].legend(fontsize=8)
+                        fontsize=18, ha='left', va='top', color=color)
+        # axs[i].legend(fontsize=8)
 
     plt.tight_layout()
     buffer = io.BytesIO()
