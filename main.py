@@ -31,6 +31,8 @@ def fit_model(data, start_date):
     return model, filtered_data
 
 def calculate_cagr(start_price, end_price, years):
+    # Compound Annual Growth Rate (CAGR)
+    # CAGR = (Ending Value / Beginning Value) ^ (1 / Number of Years) - 1
     return (end_price / start_price) ** (1 / years) - 1
 
 def create_plot(etf_data, models):
@@ -88,6 +90,7 @@ def process_ticker(ticker):
 
     return {
         'ticker': ticker,
+        'title': ETF_INFO[ticker]['title'],
         'pct_yearly_change': pct_yearly_change,
         'length_of_time': length_of_time,
         'image_base64': image_base64
@@ -97,7 +100,7 @@ def process_ticker(ticker):
 def home():
     ticker_data = [process_ticker(ticker) for ticker in TICKERS]
     ticker_data = [data for data in ticker_data if data is not None]
-    ticker_data.sort(key=lambda x: x['pct_yearly_change'], reverse=True)
+    ticker_data.sort(key=lambda x: x['title'])
 
     style = Style("""
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 1200px; margin: 0 auto; padding: 20px; background-color: #f0f4f8; }
@@ -117,7 +120,7 @@ def home():
         style,
         Title("ETF Analysis"),
         H1("ETF Performance Analysis"),
-        P("This is a simple analysis of the performance of some ETFs in the Australian market. This is not financial advice; please consult a professional before making investment decisions.", cls="disclaimer"),
+        P("This is a simple analysis of the performance of some ETFs in the Australian market. This is not financial advice.", cls="disclaimer"),
     ]
 
     for data in ticker_data:
@@ -132,7 +135,7 @@ def home():
             ),
             Div(
                 Div(
-                    Div("CAGR", cls="stat-label"),
+                    Div("Compound Annual Growth Rate", cls="stat-label"),
                     Div(f"{data['pct_yearly_change']:.2f}%", cls="stat-value"),
                     cls="stat"
                 ),

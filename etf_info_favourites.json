@@ -8,7 +8,7 @@
         },
         {
             "ticker": "SPY",
-            "title": "S&P 500 ETF",
+            "title": "United States S&P 500 ETF",
             "name": "SPDR® S&P 500® ETF Trust",
             "description": "Tracks S&P 500® Index, covering the top 500 companies in the US",
             "etfType": "US Equity Index"
