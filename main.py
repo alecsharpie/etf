@@ -3,7 +3,7 @@ from fasthtml.common import *
 import yfinance as yf
 import pandas as pd
 import matplotlib
-matplotlib.use('Agg')  # Set the backend to Agg before importing pyplot
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from sklearn.linear_model import LinearRegression
 from datetime import date, timedelta
@@ -13,7 +13,6 @@ import json
 
 app = FastHTML()
 
-# Load ETF info from JSON
 with open('etf_info_favourites.json', 'r') as f:
     ETF_INFO = {etf['ticker']: etf for etf in json.load(f)['etfs']}
 
@@ -31,8 +30,7 @@ def fit_model(data, start_date):
     return model, filtered_data
 
 def calculate_cagr(start_price, end_price, years):
-    # Compound Annual Growth Rate (CAGR)
-    # CAGR = (Ending Value / Beginning Value) ^ (1 / Number of Years) - 1
+    # Compound Annual Growth Rate (CAGR) = (Ending Value / Beginning Value) ^ (1 / Number of Years) - 1
     return (end_price / start_price) ** (1 / years) - 1
 
 def create_plot(etf_data, models):
@@ -54,7 +52,6 @@ def create_plot(etf_data, models):
         axs[i].annotate(f'Price is {abs(delta_percent):.2f}% {direction} prediction',
                         xy=(0.05, 0.95), xycoords='axes fraction',
                         fontsize=18, ha='left', va='top', color=color)
-        # axs[i].legend(fontsize=8)
 
     plt.tight_layout()
     buffer = io.BytesIO()
@@ -106,7 +103,7 @@ def home():
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 1200px; margin: 0 auto; padding: 20px; background-color: #f0f4f8; }
         h1 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; text-align: center; }
         h2 { color: #2980b9; margin-top: 0; }
-        .etf-card { background-color: #ffffff; border-radius: 12px; padding: 25px; margin-bottom: 30px; box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1); }
+        .etf-card { background-color: #ffffff; border-radius: 12px; padding: 25px; margin-bottom: 30px; margin-top: 10px; box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1); }
         .etf-info { margin-bottom: 20px; }
         .etf-stats { display: flex; justify-content: flex-start; margin-bottom: 20px; }
         .stat { padding: 10px 20px 10px 0; }
@@ -119,8 +116,10 @@ def home():
     results = [
         style,
         Title("ETF Analysis"),
-        H1("ETF Performance Analysis"),
-        P("This is a simple analysis of the performance of some ETFs in the Australian market. This is not financial advice.", cls="disclaimer"),
+        H1("ETF Analysis"),
+        P("This is not financial advice, this is a simple analysis of some ETFs in the Australian market. It's based on the mean reversion principle & linear modelling. I hope the delta between actual and predicted can help guide the proportions of my buys.", cls="disclaimer"),
+        Span("Created by ", A("Alec Sharp", href="https://www.alecsharpie.me/"), cls="disclaimer"),
+
     ]
 
     for data in ticker_data:
