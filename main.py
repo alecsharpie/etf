@@ -12,7 +12,7 @@ import json
 app = FastHTML()
 
 # Load ETF info from JSON
-with open('etf_info_all.json', 'r') as f:
+with open('etf_info_favourites.json', 'r') as f:
     etf_data = json.load(f)
     ETF_INFO = {etf['ticker']: etf for etf in etf_data['etfs']}
 

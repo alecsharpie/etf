@@ -1,0 +1,33 @@
+{
+    "etfs": [{
+            "ticker": "VGS",
+            "name": "Vanguard MSCI Index International Shares ETF",
+            "description": "Tracks MSCI World ex-Australia Index, covering global developed markets",
+            "etfType": "Global Equity Index"
+        },
+        {
+            "ticker": "WRLD",
+            "name": "BetaShares Managed Risk Global Share Fund",
+            "description": "Diversified portfolio of global shares with reduced volatility and loss protection",
+            "etfType": "Global Equity Index"
+        },
+        {
+            "ticker": "WDIV",
+            "name": "SPDR® S&P® Global Dividend Fund",
+            "description": "Tracks S&P Global Dividend Aristocrats Index, focusing on high dividend-yield companies with consistent dividends",
+            "etfType": "Global Equity Index"
+        },
+        {
+            "ticker": "IWLD",
+            "name": "iShares Core MSCI World ex Australia ESG Leaders ETF",
+            "description": "Tracks MSCI World Ex Australia Custom ESG Leaders Index, focusing on companies with better sustainability credentials",
+            "etfType": "Global Equity Index"
+        },
+        {
+            "ticker": "QUAL",
+            "name": "VanEck Vectors MSCI World ex Australia Quality ETF",
+            "description": "Tracks MSCI World ex Australia Quality Index, covering 300 quality international companies",
+            "etfType": "Global Equity Index"
+        }
+    ]
+}

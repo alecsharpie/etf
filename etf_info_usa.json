@@ -1,0 +1,39 @@
+{
+    "etfs": [{
+            "ticker": "VTS",
+            "name": "Vanguard US Total Market Shares Index",
+            "description": "Tracks CRSP US Total Market Index, covering 99.5% of the US stock market",
+            "etfType": "US Equity Index"
+        },
+        {
+            "ticker": "NDQ",
+            "name": "BetaShares NASDAQ 100 ETF",
+            "description": "Tracks NASDAQ-100 Index, covering 100 largest non-financial securities on NASDAQ",
+            "etfType": "US Equity Index"
+        },
+        {
+            "ticker": "SPY",
+            "name": "SPDR® S&P 500® ETF Trust",
+            "description": "Tracks S&P 500® Index, covering the top 500 companies in the US",
+            "etfType": "US Equity Index"
+        },
+        {
+            "ticker": "IVV",
+            "name": "iShares S&P 500 ETF",
+            "description": "Tracks S&P 500 Index, covering the top 500 companies in the US",
+            "etfType": "US Equity Index"
+        },
+        {
+            "ticker": "MOAT",
+            "name": "VanEck Vectors Morningstar Wide Moat ETF",
+            "description": "Tracks Morningstar Wide Moat Focus Index, focusing on undervalued US companies with wide economic moats",
+            "etfType": "US Equity Index"
+        },
+        {
+            "ticker": "ZYUS",
+            "name": "Global X S&P 500 High Yield Low Volatility ETF",
+            "description": "Tracks S&P 500 Low Volatility High Dividend Index, focusing on 50 highest yielding and least volatile S&P 500 stocks",
+            "etfType": "US Equity Index"
+        }
+    ]
+}

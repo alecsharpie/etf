@@ -1,0 +1,39 @@
+{
+    "etfs": [{
+            "ticker": "VGE",
+            "name": "Vanguard FTSE Emerging Markets Shares ETF",
+            "description": "Tracks FTSE Emerging Markets All Cap China A Inclusion Index, covering emerging markets companies",
+            "etfType": "Global Equity Sectors"
+        },
+        {
+            "ticker": "FUEL",
+            "name": "BetaShares Global Energy Companies ETF - Currency Hedged",
+            "description": "Covers largest global energy companies by market cap, excluding Australian listings",
+            "etfType": "Global Equity Sectors"
+        },
+        {
+            "ticker": "DJRE",
+            "name": "SPDR® Dow Jones® Global Real Estate Fund",
+            "description": "Tracks Dow Jones Global Select Real Estate Securities Index, covering global REITs and real estate companies",
+            "etfType": "Global Equity Sectors"
+        },
+        {
+            "ticker": "IXJ",
+            "name": "iShares Global Healthcare ETF",
+            "description": "Tracks S&P Global 1200 Healthcare Sector Index, covering global healthcare companies",
+            "etfType": "Global Equity Sectors"
+        },
+        {
+            "ticker": "IFRA",
+            "name": "VanEck Vectors FTSE Global Infrastructure (Hedged) ETF",
+            "description": "Tracks FTSE Developed Core Infrastructure 50/50 $A Hedged Index, covering global infrastructure securities",
+            "etfType": "Global Equity Sectors"
+        },
+        {
+            "ticker": "ROBO",
+            "name": "Global X ROBO Global Robotics and Automation ETF",
+            "description": "Tracks ROBO Global Robotics and Automation Index, focusing on robotics, automation, and AI companies",
+            "etfType": "Global Equity Sectors"
+        }
+    ]
+}

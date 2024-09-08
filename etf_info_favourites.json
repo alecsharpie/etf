@@ -1,0 +1,27 @@
+{
+    "etfs": [{
+            "ticker": "VAS",
+            "name": "Vanguard Australian Shares Index ETF",
+            "description": "Tracks S&P/ASX 300 index, covering Australia's 300 largest companies",
+            "etfType": "Australian Equity Index"
+        },
+        {
+            "ticker": "SPY",
+            "name": "SPDR® S&P 500® ETF Trust",
+            "description": "Tracks S&P 500® Index, covering the top 500 companies in the US",
+            "etfType": "US Equity Index"
+        },
+        {
+            "ticker": "VGS",
+            "name": "Vanguard MSCI Index International Shares ETF",
+            "description": "Tracks MSCI World ex-Australia Index, covering global developed markets",
+            "etfType": "Global Equity Index"
+        },
+        {
+            "ticker": "IXJ",
+            "name": "iShares Global Healthcare ETF",
+            "description": "Tracks S&P Global 1200 Healthcare Sector Index, covering global healthcare companies",
+            "etfType": "Global Equity Sectors"
+        }
+    ]
+}
