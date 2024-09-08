@@ -1,4 +1,4 @@
-from fasthtml import FastHTML, Title, Main, H1, Img
+from fasthtml import FastHTML, Title, Main, Img, P, Div, Style
 from fasthtml.common import *
 import yfinance as yf
 import pandas as pd
@@ -13,14 +13,12 @@ app = FastHTML()
 
 # Load ETF info from JSON
 with open('etf_info_favourites.json', 'r') as f:
-    etf_data = json.load(f)
-    ETF_INFO = {etf['ticker']: etf for etf in etf_data['etfs']}
+    ETF_INFO = {etf['ticker']: etf for etf in json.load(f)['etfs']}
 
 TICKERS = list(ETF_INFO.keys())
 
 def get_past_date(days_ago):
-    today = date.today()
-    return (today - timedelta(days=days_ago)).isoformat()
+    return (date.today() - timedelta(days=days_ago)).isoformat()
 
 def fit_model(data, start_date):
     filtered_data = data[data['Date'] >= pd.to_datetime(start_date)]
@@ -30,82 +28,122 @@ def fit_model(data, start_date):
     model.fit(X, y)
     return model, filtered_data
 
+def calculate_cagr(start_price, end_price, years):
+    return (end_price / start_price) ** (1 / years) - 1
+
+def create_plot(etf_data, models):
+    fig, axs = plt.subplots(1, 3, figsize=(20, 5))
+    latest_date = etf_data['DateNumeric'].iloc[-1]
+    latest_price = etf_data['Close'].iloc[-1]
+
+    for i, (timespan, (model, data)) in enumerate(models.items()):
+        predicted_price = model.predict(pd.DataFrame({'DateNumeric': [latest_date]}))[0]
+        delta_percent = ((latest_price - predicted_price) / predicted_price) * 100
+        direction = "above" if delta_percent > 0 else "below"
+        color = "green" if delta_percent > 0 else "red"
+
+        axs[i].plot(data['Date'], data['Close'], label='Actual Price', color='black', linewidth=1)
+        axs[i].plot(data['Date'], model.predict(data[['DateNumeric']]), label=f'{timespan} Prediction', linewidth=1)
+        axs[i].set_title(f"Based on {timespan} of data", fontsize=14)
+        axs[i].set_ylabel('Price (AUD)', fontsize=10)
+        axs[i].tick_params(axis='both', which='major', labelsize=8)
+        axs[i].annotate(f'Price is {abs(delta_percent):.2f}% {direction} prediction',
+                        xy=(0.05, 0.95), xycoords='axes fraction',
+                        fontsize=14, ha='left', va='top', color=color, weight='bold')
+        axs[i].legend(fontsize=8)
+
+    plt.tight_layout()
+    buffer = io.BytesIO()
+    plt.savefig(buffer, format='png', dpi=150)
+    buffer.seek(0)
+    plt.close(fig)
+    return base64.b64encode(buffer.getvalue()).decode()
+
+def process_ticker(ticker):
+    etf_data = yf.download(f"{ticker}.AX", start='2000-01-01')
+    if etf_data.empty:
+        return None
+
+    etf_data['Date'] = etf_data.index
+    etf_data['DateNumeric'] = etf_data['Date'].apply(lambda date: date.toordinal())
+
+    models = {
+        '20 Years': fit_model(etf_data, get_past_date(20 * 365)),
+        '3 Years': fit_model(etf_data, get_past_date(3 * 365)),
+        '1 Year': fit_model(etf_data, get_past_date(365)),
+    }
+
+    model_20y, data_20y = models['20 Years']
+    start_price = data_20y['Close'].iloc[0]
+    end_price = data_20y['Close'].iloc[-1]
+    years = (data_20y['Date'].iloc[-1] - data_20y['Date'].iloc[0]).days / 365.25
+
+    cagr = calculate_cagr(start_price, end_price, years)
+    pct_yearly_change = round(cagr * 100, 2)
+    length_of_time = round(years, 2)
+
+    image_base64 = create_plot(etf_data, models)
+
+    return {
+        'ticker': ticker,
+        'pct_yearly_change': pct_yearly_change,
+        'length_of_time': length_of_time,
+        'image_base64': image_base64
+    }
+
 @app.get("/")
 def home():
-    ticker_data = []
-    for ticker in TICKERS:
-        etf_data = yf.download(f"{ticker}.AX", start='1973-01-01')  # Fetch 50 years of data
-        if etf_data.empty:
-            continue  # Skip this ticker if no data is available
-        etf_data['Date'] = etf_data.index
-        etf_data['DateNumeric'] = etf_data['Date'].apply(lambda date: date.toordinal())
+    ticker_data = [process_ticker(ticker) for ticker in TICKERS]
+    ticker_data = [data for data in ticker_data if data is not None]
+    ticker_data.sort(key=lambda x: x['pct_yearly_change'], reverse=True)
 
-        models = {
-            '50Y': fit_model(etf_data, get_past_date(50 * 365)),
-            '20Y': fit_model(etf_data, get_past_date(20 * 365)),
-            '3Y': fit_model(etf_data, get_past_date(3 * 365)),
-            '1Y': fit_model(etf_data, get_past_date(365)),
-        }
+    style = Style("""
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 1200px; margin: 0 auto; padding: 20px; background-color: #f0f4f8; }
+        h1 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; text-align: center; }
+        h2 { color: #2980b9; margin-top: 0; }
+        .etf-card { background-color: #ffffff; border-radius: 12px; padding: 25px; margin-bottom: 30px; box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1); }
+        .etf-info { margin-bottom: 20px; }
+        .etf-stats { display: flex; justify-content: flex-start; margin-bottom: 20px; }
+        .stat { padding: 10px 20px 10px 0; }
+        .stat-label { font-size: 0.9em; color: #7f8c8d; margin-bottom: 2px; }
+        .stat-value { font-size: 1.1em; font-weight: bold; color: #2c3e50; }
+        img { max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); }
+        .disclaimer { color: #7f8c8d; font-style: italic; margin-bottom: 20px; }
+    """)
 
-        latest_date = etf_data['DateNumeric'].iloc[-1]
-        latest_price = etf_data['Close'].iloc[-1]
+    results = [
+        style,
+        Title("ETF Analysis"),
+        H1("ETF Performance Analysis"),
+        P("This is a simple analysis of the performance of some ETFs in the Australian market. This is not financial advice; please consult a professional before making investment decisions.", cls="disclaimer"),
+    ]
 
-        model_50y, _ = models['50Y']
-        predicted_price_50y = model_50y.predict([[latest_date]])[0]
-        delta_50y = predicted_price_50y - latest_price
-
-        slope_50y = model_50y.coef_[0]
-        yearly_change = round(slope_50y * 365, 2)
-        pct_yearly_change = round((yearly_change / latest_price) * 100, 2)
-        length_of_time = round((etf_data['Date'].iloc[-1] - etf_data['Date'].iloc[0]).days / 365, 2)
-
-        ticker_data.append((ticker, etf_data, models, delta_50y, pct_yearly_change, length_of_time))
-
-    # Sort tickers based on 50Y delta (not absolute value)
-    ticker_data.sort(key=lambda x: x[4], reverse=True)
-
-    results = [Title("ETF Analysis"), H1("ETF Analysis")]
-    for ticker, etf_data, models, _, yearly_change, length_of_time in ticker_data:
-        fig, axs = plt.subplots(1, 4, figsize=(20, 5))
-        fig.suptitle(f'{ticker} - {ETF_INFO[ticker]["name"]} ({ETF_INFO[ticker]["etfType"]})\n{ETF_INFO[ticker]["description"]}\nyearly change: {yearly_change}%\nyears of data: {length_of_time}', fontsize=14, wrap=True)
-
-        latest_date = etf_data['DateNumeric'].iloc[-1]
-        latest_price = etf_data['Close'].iloc[-1]
-
-        for i, (timespan, (model, data)) in enumerate(models.items()):
-            input_data = pd.DataFrame([[latest_date]], columns=['DateNumeric'])
-            predicted_price = model.predict(input_data)[0]
-
-            slope_50y = model_50y.coef_[0]
-            yearly_change = round(slope_50y * 365, 2)
-            length_of_time = round((etf_data['Date'].iloc[-1] - etf_data['Date'].iloc[0]).days / 365, 2)
-
-            axs[i].plot(data['Date'], data['Close'], label='Actual Price', color='black', linewidth=1)
-            axs[i].plot(data['Date'], model.predict(data[['DateNumeric']]), label=f'{timespan} Prediction', linewidth=1)
-            axs[i].set_title(timespan, fontsize=12)
-            axs[i].set_ylabel('Price (AUD)', fontsize=8)
-            axs[i].legend(fontsize=6, loc='upper left')
-            axs[i].tick_params(axis='both', which='major', labelsize=6)
-
-            delta = predicted_price - latest_price
-            buy_sell = "Buy" if delta > 0 else "Sell"
-            delta_percent = (delta / latest_price) * 100
-
-            color = "green" if delta > 0 else "red"
-            axs[i].annotate(f'Prediction: ${predicted_price:.2f}\nDelta: ${delta:.2f} ({delta_percent:.2f}%)\n{buy_sell}',
-                            xy=(0.05, 0.95), xycoords='axes fraction',
-                            fontsize=8, ha='left', va='top',
-                            bbox=dict(boxstyle='round,pad=0.5', fc='yellow', alpha=0.5),
-                            color=color)
-
-        plt.tight_layout()
-        buffer = io.BytesIO()
-        plt.savefig(buffer, format='png', dpi=150)
-        buffer.seek(0)
-        image_base64 = base64.b64encode(buffer.getvalue()).decode()
-
-        results.append(Img(src=f"data:image/png;base64,{image_base64}", alt=f"{ticker} Analysis", style="width: 100%; margin-top: 10px;"))
-        plt.close(fig)
+    for data in ticker_data:
+        ticker = data['ticker']
+        etf_info = ETF_INFO[ticker]
+        results.append(Div(
+            H2(f"{etf_info['title']} ({ticker})"),
+            Div(
+                P(f"{etf_info['name']} ({etf_info['etfType']})"),
+                P(f"{etf_info['description']}"),
+                cls="etf-info"
+            ),
+            Div(
+                Div(
+                    Div("CAGR", cls="stat-label"),
+                    Div(f"{data['pct_yearly_change']:.2f}%", cls="stat-value"),
+                    cls="stat"
+                ),
+                Div(
+                    Div("Data Period", cls="stat-label"),
+                    Div(f"{data['length_of_time']:.2f} years", cls="stat-value"),
+                    cls="stat"
+                ),
+                cls="etf-stats"
+            ),
+            Img(src=f"data:image/png;base64,{data['image_base64']}", alt=f"{ticker} Analysis"),
+            cls="etf-card"
+        ))
 
     return Main(*results)
 
