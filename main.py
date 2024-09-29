@@ -35,7 +35,7 @@ def calculate_cagr(start_price, end_price, years):
     return (end_price / start_price) ** (1 / years) - 1
 
 def create_plot(etf_data, model, data):
-    fig, ax = plt.subplots(figsize=(10, 5))
+    fig, ax = plt.subplots(figsize=(12, 6))  # Increased figure size
 
     if model is None or data is None:
         ax.text(0.5, 0.5, "Insufficient data", ha='center', va='center')
@@ -45,7 +45,22 @@ def create_plot(etf_data, model, data):
         ax.plot(data['Date'], model.predict(data[['DateNumeric']]), label='Prediction', linewidth=1)
         ax.set_ylabel('Price (AUD)', fontsize=10)
         ax.tick_params(axis='both', which='major', labelsize=8)
-        ax.legend()
+        # remove legend
+        ax.legend().set_visible(False)
+        # hide top and right spines
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        # add light grid to y axis
+        ax.yaxis.grid(color='gray', linestyle='--', alpha=0.5)
+        # axis labels
+        plt.ylabel('Price (AUD)', fontsize=16)
+        # axis ticks
+        plt.xticks(fontsize=12)
+        plt.yticks(fontsize=12)
+
+
+        # Format y-axis labels as currency
+        ax.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda x, p: f'${x:,.2f}'))
 
         latest_date = etf_data['DateNumeric'].iloc[-1]
         latest_price = etf_data['Close'].iloc[-1]
@@ -58,7 +73,7 @@ def create_plot(etf_data, model, data):
 
     plt.tight_layout()
     buffer = io.BytesIO()
-    plt.savefig(buffer, format='png', dpi=150)
+    plt.savefig(buffer, format='png', dpi=150, bbox_inches='tight')  # Added bbox_inches='tight' to reduce whitespace
     buffer.seek(0)
     plt.close(fig)
     return base64.b64encode(buffer.getvalue()).decode(), prediction_info
@@ -119,7 +134,7 @@ def home():
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.6;
             color: #333;
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 20px;
             background-color: #f0f4f8;
@@ -147,47 +162,48 @@ def home():
         .plot-cards {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
+            gap: 15px;
         }
         .plot-card {
             background-color: #f9f9f9;
             border-radius: 8px;
-            padding: 15px;
+            padding: 10px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             display: flex;
             flex-direction: column;
         }
         .plot-title {
-            font-size: 1.1em;
+            font-size: 1em;
             font-weight: bold;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
             color: #2c3e50;
         }
         .plot-info {
-            margin-top: 10px;
-            font-size: 0.9em;
+            margin-top: 5px;
+            font-size: 0.8em;
             color: #34495e;
         }
         .prediction-info {
-            margin-top: 10px;
+            margin-top: 5px;
             font-weight: bold;
+            font-size: 0.9em;
         }
         .above { color: #e74c3c; }
         .below { color: #2ecc71; }
         .cagr-info {
-            margin-top: auto;
+            margin-top: 5px;
         }
         .cagr-label {
-            font-size: 0.9em;
+            font-size: 0.8em;
             color: #7f8c8d;
         }
         .cagr-value {
-            font-size: 1.1em;
+            font-size: 0.9em;
             font-weight: bold;
             color: #2c3e50;
         }
         img {
-            max-width: 100%;
+            width: 100%;
             height: auto;
             border-radius: 8px;
         }
@@ -196,12 +212,12 @@ def home():
             font-style: italic;
             margin-bottom: 20px;
         }
-        @media (max-width: 1000px) {
+        @media (max-width: 1200px) {
             .plot-cards {
                 grid-template-columns: repeat(2, 1fr);
             }
         }
-        @media (max-width: 600px) {
+        @media (max-width: 800px) {
             .plot-cards {
                 grid-template-columns: 1fr;
             }
@@ -226,7 +242,7 @@ def home():
             if info['cagr_data']:
                 cagr_info = Div(
                     Div("CAGR:", cls="cagr-label"),
-                    Div(f"{info['cagr_data']['cagr']}% ({info['cagr_data']['years']} years)", cls="cagr-value"),
+                    Div(f"{info['cagr_data']['cagr']}%", cls="cagr-value"),
                     cls="cagr-info"
                 )
 
@@ -243,7 +259,6 @@ def home():
                 Div(
                     Div(period, cls="plot-title"),
                     Img(src=f"data:image/png;base64,{info['plot']}", alt=f"{ticker} {period} Analysis"),
-                    Div(f"Analysis based on {period} of data", cls="plot-info"),
                     prediction_info,
                     cagr_info,
                     cls="plot-card"
