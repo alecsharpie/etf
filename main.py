@@ -166,9 +166,10 @@ def home():
             left: 0;
             right: 0;
             bottom: 0;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200' viewBox='0 0 400 200'%3E%3Cpath d='M0 100 C50 80, 50 120, 100 100 S150 80, 200 100 S250 120, 300 100 S350 80, 400 100' stroke='rgba(231, 76, 60, 0.3)' fill='none' stroke-width='2'/%3E%3Cpath d='M0 100 C30 70, 70 130, 100 100 S130 70, 200 100 S270 130, 300 100 S330 70, 400 100' stroke='rgba(46, 204, 113, 0.3)' fill='none' stroke-width='2'/%3E%3Cpath d='M0 100 C80 50, 120 150, 200 100 S280 50, 400 100' stroke='rgba(231, 76, 60, 0.2)' fill='none' stroke-width='1'/%3E%3Cpath d='M0 100 C100 70, 200 130, 300 100 S400 70, 500 100' stroke='rgba(46, 204, 113, 0.2)' fill='none' stroke-width='1'/%3E%3Cpath d='M-50 100 Q0 50, 50 100 T150 100 T250 100 T350 100 T450 100' stroke='rgba(231, 76, 60, 0.1)' fill='none' stroke-width='1'/%3E%3Cpath d='M-50 100 Q0 150, 50 100 T150 100 T250 100 T350 100 T450 100' stroke='rgba(46, 204, 113, 0.1)' fill='none' stroke-width='1'/%3E%3C/svg%3E");
-            background-size: 400px 200px;
-            background-repeat: repeat;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25' viewBox='0 0 800 400'%3E%3Cpath d='M0 200 C100 160, 100 240, 200 200 S300 160, 400 200 S500 240, 600 200 S700 160, 800 200' stroke='rgba(231, 76, 60, 0.3)' fill='none' stroke-width='2'/%3E%3Cpath d='M0 200 C60 140, 140 260, 200 200 S260 140, 400 200 S540 260, 600 200 S660 140, 800 200' stroke='rgba(46, 204, 113, 0.3)' fill='none' stroke-width='2'/%3E%3Cpath d='M0 200 C160 100, 240 300, 400 200 S560 100, 800 200' stroke='rgba(231, 76, 60, 0.2)' fill='none' stroke-width='1'/%3E%3Cpath d='M0 200 C200 140, 400 260, 600 200 S800 140, 1000 200' stroke='rgba(46, 204, 113, 0.2)' fill='none' stroke-width='1'/%3E%3Cpath d='M-100 200 Q0 100, 100 200 T300 200 T500 200 T700 200 T900 200' stroke='rgba(231, 76, 60, 0.1)' fill='none' stroke-width='1'/%3E%3Cpath d='M-100 200 Q0 300, 100 200 T300 200 T500 200 T700 200 T900 200' stroke='rgba(46, 204, 113, 0.1)' fill='none' stroke-width='1'/%3E%3C/svg%3E");
+            background-size: cover;
+            background-position: center;
+            background-repeat: repeat-x;
             opacity: 0.7;
             z-index: 1;
         }
