@@ -126,8 +126,8 @@ def home():
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
 
         :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #34495e;
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
             --accent-color-1: #e74c3c;
             --accent-color-2: #2ecc71;
             --background-color: #f5f7fa;
@@ -147,29 +147,30 @@ def home():
             background-color: var(--background-color);
         }
 
-        h1 {
-            color: var(--primary-color);
-            text-align: center;
-            font-size: 2.5em;
-            margin-bottom: 20px;
-            font-weight: 600;
-        }
-
-        h2 {
-            color: var(--secondary-color);
-            margin-top: 0;
-            font-size: 1.8em;
-            font-weight: 600;
-        }
-
         .header-section {
             background-color: white;
-            padding: 40px;
+            padding: 60px 40px;
             border-radius: 12px;
             margin-bottom: 40px;
             text-align: center;
             position: relative;
             overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border-color);
+        }
+
+        .header-section::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200' viewBox='0 0 400 200'%3E%3Cpath d='M0 100 C50 80, 50 120, 100 100 S150 80, 200 100 S250 120, 300 100 S350 80, 400 100' stroke='rgba(231, 76, 60, 0.3)' fill='none' stroke-width='2'/%3E%3Cpath d='M0 100 C30 70, 70 130, 100 100 S130 70, 200 100 S270 130, 300 100 S330 70, 400 100' stroke='rgba(46, 204, 113, 0.3)' fill='none' stroke-width='2'/%3E%3Cpath d='M0 100 C80 50, 120 150, 200 100 S280 50, 400 100' stroke='rgba(231, 76, 60, 0.2)' fill='none' stroke-width='1'/%3E%3Cpath d='M0 100 C100 70, 200 130, 300 100 S400 70, 500 100' stroke='rgba(46, 204, 113, 0.2)' fill='none' stroke-width='1'/%3E%3Cpath d='M-50 100 Q0 50, 50 100 T150 100 T250 100 T350 100 T450 100' stroke='rgba(231, 76, 60, 0.1)' fill='none' stroke-width='1'/%3E%3Cpath d='M-50 100 Q0 150, 50 100 T150 100 T250 100 T350 100 T450 100' stroke='rgba(46, 204, 113, 0.1)' fill='none' stroke-width='1'/%3E%3C/svg%3E");
+            background-size: 400px 200px;
+            background-repeat: repeat;
+            opacity: 0.7;
+            z-index: 1;
         }
 
         .header-content {
@@ -177,38 +178,18 @@ def home():
             z-index: 2;
         }
 
-        .header-background {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            z-index: 1;
-            opacity: 0.1;
-        }
-
-        .zigzag {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-        }
-
-        .zigzag-1 {
-            background: linear-gradient(45deg, transparent 49.5%, rgba(231, 76, 60, 0.3) 49.5%, rgba(231, 76, 60, 0.3) 50.5%, transparent 50.5%);
-            background-size: 20px 20px;
-        }
-
-        .zigzag-2 {
-            background: linear-gradient(-45deg, transparent 49.5%, rgba(46, 204, 113, 0.3) 49.5%, rgba(46, 204, 113, 0.3) 50.5%, transparent 50.5%);
-            background-size: 20px 20px;
-        }
-
-        .disclaimer {
-            font-style: italic;
-            margin-bottom: 20px;
-            font-size: 1em;
-            line-height: 1.6;
+        .header-section h1 {
             color: var(--secondary-color);
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .header-section p {
+            color: var(--text-color);
+            font-size: 1em;
+            max-width: 800px;
+            margin: 0 auto 15px;
         }
 
         .creator-info {
@@ -218,8 +199,15 @@ def home():
         }
 
         .creator-info a {
-            color: var(--accent-color-1);
+            color: var(--primary-color);
             text-decoration: none;
+            font-weight: 600;
+        }
+
+        h2 {
+            color: var(--secondary-color);
+            margin-top: 0;
+            font-size: 1.8em;
             font-weight: 600;
         }
 
@@ -276,8 +264,8 @@ def home():
             display: inline-block;
         }
 
-        .above { background-color: var(--accent-color-1); color: white; }
-        .below { background-color: var(--accent-color-2); color: white; }
+        .above { background-color: #e74c3c; color: white; }
+        .below { background-color: #2ecc71; color: white; }
 
         .cagr-info {
             margin-top: 15px;
@@ -318,7 +306,7 @@ def home():
                 padding: 20px;
             }
             .header-section {
-                padding: 30px;
+                padding: 40px 20px;
             }
         }
     """)
@@ -328,15 +316,11 @@ def home():
         Title("ETF Analysis: Your Financial Compass"),
         Div(
             Div(
-                Div(cls="zigzag zigzag-1"),
-                Div(cls="zigzag zigzag-2"),
-                cls="header-background"
-            ),
-            Div(
                 H1("ETF Analysis: Your Financial Compass"),
-                P("Explore the Australian ETF market with our unique perspective using mean reversion principles and linear modeling. Not financial advice – just a thoughtful guide for your investment journey.", cls="disclaimer"),
+                P("Explore the Australian ETF market with our unique perspective, combining mean reversion principles and linear modeling."),
+                P("Remember, this tool provides insights, not financial advice. Use it wisely in your investment journey."),
                 Div(
-                    Span("Crafted by "),
+                    Span("Developed by "),
                     A("Alec Sharp", href="https://www.alecsharpie.me/", target="_blank"),
                     cls="creator-info"
                 ),
