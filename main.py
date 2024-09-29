@@ -23,6 +23,8 @@ def get_past_date(days_ago):
 
 def fit_model(data, start_date):
     filtered_data = data[data['Date'] >= pd.to_datetime(start_date)]
+    if filtered_data.empty:
+        return None, None
     X = filtered_data[['DateNumeric']]
     y = filtered_data['Close']
     model = LinearRegression()
@@ -30,35 +32,36 @@ def fit_model(data, start_date):
     return model, filtered_data
 
 def calculate_cagr(start_price, end_price, years):
-    # Compound Annual Growth Rate (CAGR) = (Ending Value / Beginning Value) ^ (1 / Number of Years) - 1
     return (end_price / start_price) ** (1 / years) - 1
 
-def create_plot(etf_data, models):
-    fig, axs = plt.subplots(1, 3, figsize=(20, 5))
-    latest_date = etf_data['DateNumeric'].iloc[-1]
-    latest_price = etf_data['Close'].iloc[-1]
+def create_plot(etf_data, model, data):
+    fig, ax = plt.subplots(figsize=(10, 5))
 
-    for i, (timespan, (model, data)) in enumerate(models.items()):
+    if model is None or data is None:
+        ax.text(0.5, 0.5, "Insufficient data", ha='center', va='center')
+        prediction_info = None
+    else:
+        ax.plot(data['Date'], data['Close'], label='Actual Price', color='black', linewidth=1)
+        ax.plot(data['Date'], model.predict(data[['DateNumeric']]), label='Prediction', linewidth=1)
+        ax.set_ylabel('Price (AUD)', fontsize=10)
+        ax.tick_params(axis='both', which='major', labelsize=8)
+        ax.legend()
+
+        latest_date = etf_data['DateNumeric'].iloc[-1]
+        latest_price = etf_data['Close'].iloc[-1]
         predicted_price = model.predict(pd.DataFrame({'DateNumeric': [latest_date]}))[0]
         delta_percent = ((latest_price - predicted_price) / predicted_price) * 100
-        direction = "above" if delta_percent > 0 else "below"
-        color = "green" if delta_percent < 0 else "red"
-
-        axs[i].plot(data['Date'], data['Close'], label='Actual Price', color='black', linewidth=1)
-        axs[i].plot(data['Date'], model.predict(data[['DateNumeric']]), label=f'{timespan} Prediction', linewidth=1)
-        axs[i].set_title(f"Based on {timespan} of data", fontsize=14)
-        axs[i].set_ylabel('Price (AUD)', fontsize=10)
-        axs[i].tick_params(axis='both', which='major', labelsize=8)
-        axs[i].annotate(f'Price is {abs(delta_percent):.2f}% {direction} prediction',
-                        xy=(0.05, 0.95), xycoords='axes fraction',
-                        fontsize=18, ha='left', va='top', color=color)
+        prediction_info = {
+            'delta_percent': delta_percent,
+            'direction': 'above' if delta_percent > 0 else 'below'
+        }
 
     plt.tight_layout()
     buffer = io.BytesIO()
     plt.savefig(buffer, format='png', dpi=150)
     buffer.seek(0)
     plt.close(fig)
-    return base64.b64encode(buffer.getvalue()).decode()
+    return base64.b64encode(buffer.getvalue()).decode(), prediction_info
 
 def process_ticker(ticker):
     etf_data = yf.download(f"{ticker}.AX", start='2000-01-01')
@@ -68,29 +71,41 @@ def process_ticker(ticker):
     etf_data['Date'] = etf_data.index
     etf_data['DateNumeric'] = etf_data['Date'].apply(lambda date: date.toordinal())
 
+    total_years = (etf_data.index[-1] - etf_data.index[0]).days / 365.25
+    max_years = min(20, total_years)
+
     models = {
-        '20 Years': fit_model(etf_data, get_past_date(20 * 365)),
+        f'Max ({max_years:.1f} Years)': fit_model(etf_data, etf_data.index[0]),
         '3 Years': fit_model(etf_data, get_past_date(3 * 365)),
         '1 Year': fit_model(etf_data, get_past_date(365)),
     }
 
-    model_20y, data_20y = models['20 Years']
-    start_price = data_20y['Close'].iloc[0]
-    end_price = data_20y['Close'].iloc[-1]
-    years = (data_20y['Date'].iloc[-1] - data_20y['Date'].iloc[0]).days / 365.25
+    plots_and_cagr = {}
+    for period, (model, data) in models.items():
+        plot, prediction_info = create_plot(etf_data, model, data)
 
-    cagr = calculate_cagr(start_price, end_price, years)
-    pct_yearly_change = round(cagr * 100, 2)
-    length_of_time = round(years, 2)
+        if model is not None and data is not None:
+            start_price = data['Close'].iloc[0]
+            end_price = data['Close'].iloc[-1]
+            years = (data['Date'].iloc[-1] - data['Date'].iloc[0]).days / 365.25
+            cagr = calculate_cagr(start_price, end_price, years)
+            cagr_data = {
+                'cagr': round(cagr * 100, 2),
+                'years': round(years, 2)
+            }
+        else:
+            cagr_data = None
 
-    image_base64 = create_plot(etf_data, models)
+        plots_and_cagr[period] = {
+            'plot': plot,
+            'cagr_data': cagr_data,
+            'prediction_info': prediction_info
+        }
 
     return {
         'ticker': ticker,
         'title': ETF_INFO[ticker]['title'],
-        'pct_yearly_change': pct_yearly_change,
-        'length_of_time': length_of_time,
-        'image_base64': image_base64
+        'plots_and_cagr': plots_and_cagr
     }
 
 @app.get("/")
@@ -100,17 +115,97 @@ def home():
     ticker_data.sort(key=lambda x: x['title'])
 
     style = Style("""
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 1200px; margin: 0 auto; padding: 20px; background-color: #f0f4f8; }
-        h1 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; text-align: center; }
-        h2 { color: #2980b9; margin-top: 0; }
-        .etf-card { background-color: #ffffff; border-radius: 12px; padding: 25px; margin-bottom: 30px; margin-top: 10px; box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1); }
-        .etf-info { margin-bottom: 20px; }
-        .etf-stats { display: flex; justify-content: flex-start; margin-bottom: 20px; }
-        .stat { padding: 10px 20px 10px 0; }
-        .stat-label { font-size: 0.9em; color: #7f8c8d; margin-bottom: 2px; }
-        .stat-value { font-size: 1.1em; font-weight: bold; color: #2c3e50; }
-        img { max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); }
-        .disclaimer { color: #7f8c8d; font-style: italic; margin-bottom: 20px; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f4f8;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            text-align: center;
+        }
+        h2 {
+            color: #2980b9;
+            margin-top: 0;
+        }
+        .etf-card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+        .etf-info {
+            margin-bottom: 20px;
+        }
+        .plot-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        .plot-card {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+        .plot-title {
+            font-size: 1.1em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        .plot-info {
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #34495e;
+        }
+        .prediction-info {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .above { color: #e74c3c; }
+        .below { color: #2ecc71; }
+        .cagr-info {
+            margin-top: auto;
+        }
+        .cagr-label {
+            font-size: 0.9em;
+            color: #7f8c8d;
+        }
+        .cagr-value {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+        .disclaimer {
+            color: #7f8c8d;
+            font-style: italic;
+            margin-bottom: 20px;
+        }
+        @media (max-width: 1000px) {
+            .plot-cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (max-width: 600px) {
+            .plot-cards {
+                grid-template-columns: 1fr;
+            }
+        }
     """)
 
     results = [
@@ -119,12 +214,42 @@ def home():
         H1("ETF Analysis"),
         P("This is not financial advice, this is a simple analysis of some ETFs in the Australian market. It's based on the mean reversion principle & linear modelling. I hope the delta between actual and predicted can help guide the proportions of my buys.", cls="disclaimer"),
         Span("Created by ", A("Alec Sharp", href="https://www.alecsharpie.me/"), cls="disclaimer"),
-
     ]
 
     for data in ticker_data:
         ticker = data['ticker']
         etf_info = ETF_INFO[ticker]
+        plot_cards = []
+
+        for period, info in data['plots_and_cagr'].items():
+            cagr_info = ""
+            if info['cagr_data']:
+                cagr_info = Div(
+                    Div("CAGR:", cls="cagr-label"),
+                    Div(f"{info['cagr_data']['cagr']}% ({info['cagr_data']['years']} years)", cls="cagr-value"),
+                    cls="cagr-info"
+                )
+
+            prediction_info = ""
+            if info['prediction_info']:
+                direction = info['prediction_info']['direction']
+                delta = abs(info['prediction_info']['delta_percent'])
+                prediction_info = Div(
+                    f"Price is {delta:.2f}% {direction} prediction",
+                    cls=f"prediction-info {direction}"
+                )
+
+            plot_cards.append(
+                Div(
+                    Div(period, cls="plot-title"),
+                    Img(src=f"data:image/png;base64,{info['plot']}", alt=f"{ticker} {period} Analysis"),
+                    Div(f"Analysis based on {period} of data", cls="plot-info"),
+                    prediction_info,
+                    cagr_info,
+                    cls="plot-card"
+                )
+            )
+
         results.append(Div(
             H2(f"{etf_info['title']} ({ticker})"),
             Div(
@@ -132,20 +257,7 @@ def home():
                 P(f"{etf_info['description']}"),
                 cls="etf-info"
             ),
-            Div(
-                Div(
-                    Div("Compound Annual Growth Rate", cls="stat-label"),
-                    Div(f"{data['pct_yearly_change']:.2f}%", cls="stat-value"),
-                    cls="stat"
-                ),
-                Div(
-                    Div("Data Period", cls="stat-label"),
-                    Div(f"{data['length_of_time']:.2f} years", cls="stat-value"),
-                    cls="stat"
-                ),
-                cls="etf-stats"
-            ),
-            Img(src=f"data:image/png;base64,{data['image_base64']}", alt=f"{ticker} Analysis"),
+            Div(*plot_cards, cls="plot-cards"),
             cls="etf-card"
         ))
 
