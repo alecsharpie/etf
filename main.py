@@ -35,31 +35,24 @@ def calculate_cagr(start_price, end_price, years):
     return (end_price / start_price) ** (1 / years) - 1
 
 def create_plot(etf_data, model, data):
-    fig, ax = plt.subplots(figsize=(12, 6))  # Increased figure size
+    fig, ax = plt.subplots(figsize=(12, 6))
 
     if model is None or data is None:
         ax.text(0.5, 0.5, "Insufficient data", ha='center', va='center')
         prediction_info = None
     else:
-        ax.plot(data['Date'], data['Close'], label='Actual Price', color='black', linewidth=1)
-        ax.plot(data['Date'], model.predict(data[['DateNumeric']]), label='Prediction', linewidth=1)
-        ax.set_ylabel('Price (AUD)', fontsize=10)
-        ax.tick_params(axis='both', which='major', labelsize=8)
-        # remove legend
-        ax.legend().set_visible(False)
-        # hide top and right spines
+        ax.plot(data['Date'], data['Close'], label='Actual Price', color='#2c3e50', linewidth=2)
+        ax.plot(data['Date'], model.predict(data[['DateNumeric']]), label='Prediction', color='#34495e', linewidth=2, linestyle='--')
+        ax.set_ylabel('Price (AUD)', fontsize=12)
+        ax.tick_params(axis='both', which='major', labelsize=10)
+        ax.legend(fontsize=10)
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)
-        # add light grid to y axis
-        ax.yaxis.grid(color='gray', linestyle='--', alpha=0.5)
-        # axis labels
-        plt.ylabel('Price (AUD)', fontsize=16)
-        # axis ticks
-        plt.xticks(fontsize=12)
-        plt.yticks(fontsize=12)
+        ax.yaxis.grid(color='#ecf0f1', linestyle='--', alpha=0.7)
+        plt.ylabel('Price (AUD)', fontsize=14)
+        plt.xticks(fontsize=10)
+        plt.yticks(fontsize=10)
 
-
-        # Format y-axis labels as currency
         ax.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda x, p: f'${x:,.2f}'))
 
         latest_date = etf_data['DateNumeric'].iloc[-1]
@@ -73,7 +66,7 @@ def create_plot(etf_data, model, data):
 
     plt.tight_layout()
     buffer = io.BytesIO()
-    plt.savefig(buffer, format='png', dpi=150, bbox_inches='tight')  # Added bbox_inches='tight' to reduce whitespace
+    plt.savefig(buffer, format='png', dpi=150, bbox_inches='tight')
     buffer.seek(0)
     plt.close(fig)
     return base64.b64encode(buffer.getvalue()).decode(), prediction_info
@@ -130,106 +123,192 @@ def home():
     ticker_data.sort(key=lambda x: x['title'])
 
     style = Style("""
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --accent-color: #e74c3c;
+            --background-color: #f5f7fa;
+            --card-background: #ffffff;
+            --text-color: #2c3e50;
+            --light-text-color: #7f8c8d;
+            --border-color: #e0e0e0;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Poppins', sans-serif;
             line-height: 1.6;
-            color: #333;
+            color: var(--text-color);
             max-width: 1400px;
             margin: 0 auto;
-            padding: 20px;
-            background-color: #f0f4f8;
+            padding: 40px;
+            background-color: var(--background-color);
         }
+
         h1 {
-            color: #2c3e50;
-            border-bottom: 2px solid #3498db;
-            padding-bottom: 10px;
+            color: var(--primary-color);
             text-align: center;
-        }
-        h2 {
-            color: #2980b9;
-            margin-top: 0;
-        }
-        .etf-card {
-            background-color: #ffffff;
-            border-radius: 12px;
-            padding: 25px;
-            margin-bottom: 30px;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-        }
-        .etf-info {
+            font-size: 3em;
             margin-bottom: 20px;
+            font-weight: 600;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
         }
+
+        h2 {
+            color: var(--secondary-color);
+            margin-top: 0;
+            font-size: 1.8em;
+            font-weight: 600;
+        }
+
+        .etf-card {
+            background-color: var(--card-background);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border-color);
+        }
+
+        .etf-info {
+            margin-bottom: 25px;
+            font-size: 1em;
+            color: var(--light-text-color);
+        }
+
         .plot-cards {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
+            gap: 20px;
         }
+
         .plot-card {
-            background-color: #f9f9f9;
+            background-color: var(--card-background);
             border-radius: 8px;
-            padding: 10px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
             display: flex;
             flex-direction: column;
+            border: 1px solid var(--border-color);
         }
+
         .plot-title {
-            font-size: 1em;
-            font-weight: bold;
-            margin-bottom: 5px;
-            color: #2c3e50;
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--secondary-color);
         }
+
         .plot-info {
-            margin-top: 5px;
-            font-size: 0.8em;
-            color: #34495e;
+            margin-top: 15px;
+            font-size: 0.9em;
+            color: var(--light-text-color);
         }
+
         .prediction-info {
-            margin-top: 5px;
-            font-weight: bold;
+            margin-top: 15px;
+            font-weight: 600;
             font-size: 0.9em;
+            padding: 6px 12px;
+            border-radius: 4px;
+            display: inline-block;
         }
-        .above { color: #e74c3c; }
-        .below { color: #2ecc71; }
+
+        .above { background-color: #e74c3c; color: white; }
+        .below { background-color: #2ecc71; color: white; }
+
         .cagr-info {
-            margin-top: 5px;
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
         }
+
         .cagr-label {
-            font-size: 0.8em;
-            color: #7f8c8d;
-        }
-        .cagr-value {
             font-size: 0.9em;
-            font-weight: bold;
-            color: #2c3e50;
+            color: var(--light-text-color);
+            margin-right: 8px;
         }
+
+        .cagr-value {
+            font-size: 1em;
+            font-weight: 600;
+            color: var(--secondary-color);
+        }
+
         img {
             width: 100%;
             height: auto;
-            border-radius: 8px;
+            border-radius: 6px;
+            margin-bottom: 15px;
         }
-        .disclaimer {
-            color: #7f8c8d;
-            font-style: italic;
+
+        .header-section {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 40px;
+            border-radius: 12px;
+            margin-bottom: 40px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-section h1 {
+            color: white;
             margin-bottom: 20px;
         }
+
+        .disclaimer {
+            font-style: italic;
+            margin-bottom: 20px;
+            font-size: 1em;
+            line-height: 1.6;
+        }
+
+        .creator-info {
+            font-size: 0.9em;
+            margin-top: 20px;
+        }
+
+        .creator-info a {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
         @media (max-width: 1200px) {
             .plot-cards {
                 grid-template-columns: repeat(2, 1fr);
             }
         }
+
         @media (max-width: 800px) {
             .plot-cards {
                 grid-template-columns: 1fr;
+            }
+            body {
+                padding: 20px;
+            }
+            .header-section {
+                padding: 30px;
             }
         }
     """)
 
     results = [
         style,
-        Title("ETF Analysis"),
-        H1("ETF Analysis"),
-        P("This is not financial advice, this is a simple analysis of some ETFs in the Australian market. It's based on the mean reversion principle & linear modelling. I hope the delta between actual and predicted can help guide the proportions of my buys.", cls="disclaimer"),
-        Span("Created by ", A("Alec Sharp", href="https://www.alecsharpie.me/"), cls="disclaimer"),
+        Title("ETF Analysis: Your Financial Compass"),
+        Div(
+            H1("ETF Analysis: Your Financial Compass"),
+            P("Welcome to your quirky guide through the Australian ETF market! We're using mean reversion principles and linear modeling to give you a unique perspective. Remember, this isn't financial advice – it's more like a treasure map for your investment adventure!", cls="disclaimer"),
+            P("Ready to explore the world of ETFs? Let's dive in and see what hidden gems we can uncover together!", cls="disclaimer"),
+            Div(
+                Span("Crafted with ☕ and 💻 by "),
+                A("Alec Sharp", href="https://www.alecsharpie.me/", target="_blank"),
+                cls="creator-info"
+            ),
+            cls="header-section"
+        ),
     ]
 
     for data in ticker_data:
@@ -241,8 +320,8 @@ def home():
             cagr_info = ""
             if info['cagr_data']:
                 cagr_info = Div(
-                    Div("CAGR:", cls="cagr-label"),
-                    Div(f"{info['cagr_data']['cagr']}%", cls="cagr-value"),
+                    Span("CAGR:", cls="cagr-label"),
+                    Span(f"{info['cagr_data']['cagr']}%", cls="cagr-value"),
                     cls="cagr-info"
                 )
 
