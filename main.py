@@ -126,9 +126,10 @@ def home():
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
 
         :root {
-            --primary-color: #3498db;
-            --secondary-color: #2c3e50;
-            --accent-color: #e74c3c;
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color-1: #e74c3c;
+            --accent-color-2: #2ecc71;
             --background-color: #f5f7fa;
             --card-background: #ffffff;
             --text-color: #2c3e50;
@@ -149,16 +150,76 @@ def home():
         h1 {
             color: var(--primary-color);
             text-align: center;
-            font-size: 3em;
+            font-size: 2.5em;
             margin-bottom: 20px;
             font-weight: 600;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
         }
 
         h2 {
             color: var(--secondary-color);
             margin-top: 0;
             font-size: 1.8em;
+            font-weight: 600;
+        }
+
+        .header-section {
+            background-color: white;
+            padding: 40px;
+            border-radius: 12px;
+            margin-bottom: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .header-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1;
+            opacity: 0.1;
+        }
+
+        .zigzag {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .zigzag-1 {
+            background: linear-gradient(45deg, transparent 49.5%, rgba(231, 76, 60, 0.3) 49.5%, rgba(231, 76, 60, 0.3) 50.5%, transparent 50.5%);
+            background-size: 20px 20px;
+        }
+
+        .zigzag-2 {
+            background: linear-gradient(-45deg, transparent 49.5%, rgba(46, 204, 113, 0.3) 49.5%, rgba(46, 204, 113, 0.3) 50.5%, transparent 50.5%);
+            background-size: 20px 20px;
+        }
+
+        .disclaimer {
+            font-style: italic;
+            margin-bottom: 20px;
+            font-size: 1em;
+            line-height: 1.6;
+            color: var(--secondary-color);
+        }
+
+        .creator-info {
+            font-size: 0.9em;
+            margin-top: 20px;
+            color: var(--light-text-color);
+        }
+
+        .creator-info a {
+            color: var(--accent-color-1);
+            text-decoration: none;
             font-weight: 600;
         }
 
@@ -215,8 +276,8 @@ def home():
             display: inline-block;
         }
 
-        .above { background-color: #e74c3c; color: white; }
-        .below { background-color: #2ecc71; color: white; }
+        .above { background-color: var(--accent-color-1); color: white; }
+        .below { background-color: var(--accent-color-2); color: white; }
 
         .cagr-info {
             margin-top: 15px;
@@ -243,39 +304,6 @@ def home():
             margin-bottom: 15px;
         }
 
-        .header-section {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 40px;
-            border-radius: 12px;
-            margin-bottom: 40px;
-            text-align: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .header-section h1 {
-            color: white;
-            margin-bottom: 20px;
-        }
-
-        .disclaimer {
-            font-style: italic;
-            margin-bottom: 20px;
-            font-size: 1em;
-            line-height: 1.6;
-        }
-
-        .creator-info {
-            font-size: 0.9em;
-            margin-top: 20px;
-        }
-
-        .creator-info a {
-            color: var(--accent-color);
-            text-decoration: none;
-            font-weight: 600;
-        }
-
         @media (max-width: 1200px) {
             .plot-cards {
                 grid-template-columns: repeat(2, 1fr);
@@ -299,13 +327,20 @@ def home():
         style,
         Title("ETF Analysis: Your Financial Compass"),
         Div(
-            H1("ETF Analysis: Your Financial Compass"),
-            P("Welcome to your quirky guide through the Australian ETF market! We're using mean reversion principles and linear modeling to give you a unique perspective. Remember, this isn't financial advice – it's more like a treasure map for your investment adventure!", cls="disclaimer"),
-            P("Ready to explore the world of ETFs? Let's dive in and see what hidden gems we can uncover together!", cls="disclaimer"),
             Div(
-                Span("Crafted with ☕ and 💻 by "),
-                A("Alec Sharp", href="https://www.alecsharpie.me/", target="_blank"),
-                cls="creator-info"
+                Div(cls="zigzag zigzag-1"),
+                Div(cls="zigzag zigzag-2"),
+                cls="header-background"
+            ),
+            Div(
+                H1("ETF Analysis: Your Financial Compass"),
+                P("Explore the Australian ETF market with our unique perspective using mean reversion principles and linear modeling. Not financial advice – just a thoughtful guide for your investment journey.", cls="disclaimer"),
+                Div(
+                    Span("Crafted by "),
+                    A("Alec Sharp", href="https://www.alecsharpie.me/", target="_blank"),
+                    cls="creator-info"
+                ),
+                cls="header-content"
             ),
             cls="header-section"
         ),
