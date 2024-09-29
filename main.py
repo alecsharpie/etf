@@ -314,15 +314,16 @@ def home():
 
     results = [
         style,
-        Title("ETF Analysis: Your Financial Compass"),
         Div(
             Div(
-                H1("ETF Analysis: Your Financial Compass"),
-                P("Explore the Australian ETF market with our unique perspective, combining mean reversion principles and linear modeling."),
-                P("Remember, this tool provides insights, not financial advice. Use it wisely in your investment journey."),
+                H1("Simple ETF Analysis"),
+                P("I don't know anything about finance. Go check out the Aussie Firebug, he seems to know what he's talking about. This analysis assumes the price will revert to the mean, based on linear regression."),
                 Div(
-                    Span("Developed by "),
+                    Span("Created by "),
                     A("Alec Sharp", href="https://www.alecsharpie.me/", target="_blank"),
+                    Span(" | "),
+                    Span("Source code available on "),
+                    A("Github", href="https://github.com/alecsharpie/etf", target="_blank"),
                     cls="creator-info"
                 ),
                 cls="header-content"
@@ -375,7 +376,7 @@ def home():
             cls="etf-card"
         ))
 
-    return Main(*results)
+    return Title("Simple ETF Analysis"), Main(*results)
 
 if __name__ == "__main__":
     import uvicorn
