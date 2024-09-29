@@ -155,7 +155,7 @@ def home():
             text-align: center;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
             border: 1px solid var(--border-color);
         }
 
@@ -217,7 +217,7 @@ def home():
             border-radius: 12px;
             padding: 30px;
             margin-bottom: 40px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
             border: 1px solid var(--border-color);
         }
 
@@ -237,7 +237,7 @@ def home():
             background-color: var(--card-background);
             border-radius: 8px;
             padding: 20px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
             display: flex;
             flex-direction: column;
             border: 1px solid var(--border-color);
