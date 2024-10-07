@@ -1,20 +1,19 @@
-[tool.poetry]
-name = "repl-nix-etf"
+[project]
+name = "etf"
 version = "0.1.0"
-description = ""
-authors = ["Your Name <you@example.com>"]
+description = "Simple eft analysis"
 readme = "README.md"
+requires-python = ">=3.12.6"
+dependencies = [
+    "yfinance == 0.2.43",
+    "matplotlib == 3.9.2",
+    "pandas == 2.2.2",
+    "scikit-learn == 1.5.1",
+    "uvicorn == 0.30.6",
+    "python-fasthtml == 0.5.1",
+]
 
-[tool.poetry.dependencies]
-python = "^3.12"
-yfinance = "^0.2.43"
-matplotlib = "^3.9.2"
-pandas = "^2.2.2"
-scikit-learn = "^1.5.1"
-uvicorn = "^0.30.6"
-python-fasthtml = "0.5.1"
-
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+[tool.uv]
+dev-dependencies = [
+    "ruff>=0.6.9",
+]
