@@ -10,10 +10,14 @@ from datetime import date, timedelta
 import io
 import base64
 import json
+import logging
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
 app = FastHTML()
 
-with open('etf_info_favourites.json', 'r') as f:
+with open('etf_info_vas_vgs.json', 'r') as f:
     ETF_INFO = {etf['ticker']: etf for etf in json.load(f)['etfs']}
 
 TICKERS = list(ETF_INFO.keys())
@@ -22,7 +26,14 @@ def get_past_date(days_ago):
     return (date.today() - timedelta(days=days_ago)).isoformat()
 
 def fit_model(data, start_date):
-    filtered_data = data[data['Date'] >= pd.to_datetime(start_date)]
+    # Create a copy of the data with timezone-naive dates
+    data_copy = data.copy()
+    data_copy['Date'] = pd.to_datetime(data_copy['Date'].dt.tz_localize(None))
+    
+    # Convert start_date to numpy datetime64[ns]
+    start_ts = pd.to_datetime(start_date).to_datetime64()
+    
+    filtered_data = data_copy[data_copy['Date'] >= start_ts]
     if filtered_data.empty:
         return None, None
     X = filtered_data[['DateNumeric']]
@@ -72,52 +83,64 @@ def create_plot(etf_data, model, data):
     return base64.b64encode(buffer.getvalue()).decode(), prediction_info
 
 def process_ticker(ticker):
-    etf_data = yf.download(f"{ticker}.AX", start='2000-01-01')
-    if etf_data.empty:
-        return None
+    logger.info(f"Processing {ticker}")
+    
+    try:
+        etf = yf.Ticker(f"{ticker}.AX")
+        etf_data = etf.history(start='2000-01-01')
+        
+        logger.info(f"Downloaded data for {ticker}")
+        if etf_data.empty:
+            logger.error(f"No data found for {ticker}")
+            return None
 
-    etf_data['Date'] = etf_data.index
-    etf_data['DateNumeric'] = etf_data['Date'].apply(lambda date: date.toordinal())
+        etf_data['Date'] = etf_data.index
+        etf_data['DateNumeric'] = etf_data['Date'].apply(lambda date: date.toordinal())
 
-    total_years = (etf_data.index[-1] - etf_data.index[0]).days / 365.25
-    max_years = min(20, total_years)
+        total_years = (etf_data.index[-1] - etf_data.index[0]).days / 365.25
+        max_years = min(20, total_years)
 
-    models = {
-        f'Max ({max_years:.1f} Years)': fit_model(etf_data, etf_data.index[0]),
-        '3 Years': fit_model(etf_data, get_past_date(3 * 365)),
-        '1 Year': fit_model(etf_data, get_past_date(365)),
-    }
-
-    plots_and_cagr = {}
-    for period, (model, data) in models.items():
-        plot, prediction_info = create_plot(etf_data, model, data)
-
-        if model is not None and data is not None:
-            start_price = data['Close'].iloc[0]
-            end_price = data['Close'].iloc[-1]
-            years = (data['Date'].iloc[-1] - data['Date'].iloc[0]).days / 365.25
-            cagr = calculate_cagr(start_price, end_price, years)
-            cagr_data = {
-                'cagr': round(cagr * 100, 2),
-                'years': round(years, 2)
-            }
-        else:
-            cagr_data = None
-
-        plots_and_cagr[period] = {
-            'plot': plot,
-            'cagr_data': cagr_data,
-            'prediction_info': prediction_info
+        models = {
+            f'Max ({max_years:.1f} Years)': fit_model(etf_data, etf_data.index[0]),
+            '3 Years': fit_model(etf_data, get_past_date(3 * 365)),
+            '1 Year': fit_model(etf_data, get_past_date(365)),
         }
 
-    return {
-        'ticker': ticker,
-        'title': ETF_INFO[ticker]['title'],
-        'plots_and_cagr': plots_and_cagr
-    }
+        plots_and_cagr = {}
+        for period, (model, data) in models.items():
+            plot, prediction_info = create_plot(etf_data, model, data)
+
+            if model is not None and data is not None:
+                start_price = data['Close'].iloc[0]
+                end_price = data['Close'].iloc[-1]
+                years = (data['Date'].iloc[-1] - data['Date'].iloc[0]).days / 365.25
+                cagr = calculate_cagr(start_price, end_price, years)
+                cagr_data = {
+                    'cagr': round(cagr * 100, 2),
+                    'years': round(years, 2)
+                }
+            else:
+                cagr_data = None
+
+            plots_and_cagr[period] = {
+                'plot': plot,
+                'cagr_data': cagr_data,
+                'prediction_info': prediction_info
+            }
+
+        return {
+            'ticker': ticker,
+            'title': ETF_INFO[ticker]['title'],
+            'plots_and_cagr': plots_and_cagr
+        }
+
+    except Exception as e:
+        logger.error(f"Error processing {ticker}: {str(e)}")
+        return None
 
 @app.get("/")
 def home():
+    logger.info(f"Processing {len(TICKERS)} ETFs")
     ticker_data = [process_ticker(ticker) for ticker in TICKERS]
     ticker_data = [data for data in ticker_data if data is not None]
     ticker_data.sort(key=lambda x: x['title'])

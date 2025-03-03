@@ -5,12 +5,10 @@ description = "Simple eft analysis"
 readme = "README.md"
 requires-python = ">=3.12.6"
 dependencies = [
-    "yfinance == 0.2.43",
-    "matplotlib == 3.9.2",
-    "pandas == 2.2.2",
-    "scikit-learn == 1.5.1",
-    "uvicorn == 0.30.6",
-    "python-fasthtml == 0.5.1",
+    "matplotlib>=3.10.1",
+    "python-fasthtml>=0.12.4",
+    "scikit-learn>=1.6.1",
+    "yfinance>=0.2.54",
 ]
 
 [tool.uv]

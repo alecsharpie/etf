@@ -1,0 +1,17 @@
+{
+    "etfs": [{
+            "ticker": "VAS",
+            "title": "Australian Top 300 ETF",
+            "name": "Vanguard Australian Shares Index ETF",
+            "description": "Tracks S&P/ASX 300 index, covering Australia's 300 largest companies",
+            "etfType": "Australian Equity Index"
+        },
+        {
+            "ticker": "VGS",
+            "title": "Global Ex-Australia ETF",
+            "name": "Vanguard MSCI Index International Shares ETF",
+            "description": "Tracks MSCI World ex-Australia Index, covering global developed markets",
+            "etfType": "Global Equity Index"
+        }
+    ]
+}
