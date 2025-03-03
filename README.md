@@ -6,7 +6,7 @@ A simple ETF analysis tool that visualizes price trends using linear regression.
 
 You can try out the tool at <TODO>
 
-![Screenshot of ETF Analysis Tool](assets/Screenshot%202025-03-04%20at%201.19.34%20am.png)
+![Screenshot of ETF Analysis Tool](assets/app-screenshot.png)
 
 ## Disclaimer
 
